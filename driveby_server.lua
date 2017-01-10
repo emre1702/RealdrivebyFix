@@ -25,7 +25,7 @@ if settings.driver[1] then
 	end
 end
 
--- Entfernen, falls Beifahrer auch mit M4 usw. schießen können soll --
+
 if settings.passenger[1] then
 	for i=#settings.passenger, 1, -1 do
 		if not validDrivebyWeapons[settings.passenger[i]] then
