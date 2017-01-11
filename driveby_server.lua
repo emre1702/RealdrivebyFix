@@ -1,4 +1,5 @@
-﻿--addEvent ( "onPlayerDamage", true )
+﻿addEvent ( "destroyPedForDrivebyFix", true )
+addEvent ( "createPedForDrivebyFix", true )
 
 local settings = {
 	driver = get"driveby_driver" or { 22,23,24,25,28,29,32 },
@@ -25,7 +26,6 @@ if settings.driver[1] then
 	end
 end
 
-
 if settings.passenger[1] then
 	for i=#settings.passenger, 1, -1 do
 		if not validDrivebyWeapons[settings.passenger[i]] then
@@ -37,45 +37,51 @@ end
 
 --Verifies the clientscript is downloaded before initiating
 addEvent ( "driveby_clientScriptLoaded", true )
-addEventHandler ( "driveby_clientScriptLoaded", getRootElement(),
-	function()
-		triggerLatentClientEvent ( client, "doSendDriveBySettings", 40000, false, client, settings, playerpeds )
-	end
-)
+addEventHandler ( "driveby_clientScriptLoaded", getRootElement(), function()
+	triggerLatentClientEvent ( client, "doSendDriveBySettings", 40000, false, client, settings, playerpeds )
+end )
 
 
+-- destroy the ped --
 local function destroyPed ( player )
 	local player = isElement ( client ) and client or isElement ( player ) and player or source
 	if isElement ( playerpeds[player] ) then
 		destroyElement ( playerpeds[player] )
+		-- sync with client --
 		triggerClientEvent ( "deletePedForDrivebyFix", player )
 	end
 end 
 addEventHandler ( "onPlayerQuit", root, destroyPed )
 addEventHandler ( "onPlayerWasted", root, destroyPed )
-addEvent ( "destroyPedForDrivebyFix", true )
 addEventHandler ( "destroyPedForDrivebyFix", root, destroyPed )
 addEventHandler ( "onVehicleExit", root, destroyPed )
 
 
-addEvent ( "createPedForDrivebyFix", true )
+-- Creates a ped to use his hitbox instead of the one, who is using driveby on the bike --
 addEventHandler ( "createPedForDrivebyFix", root, function ( )
 	local veh = getPedOccupiedVehicle ( client )
+	-- destroy the ped if there is already on --
 	destroyPed ( client )
+	-- if the player is sitting in a vehicle --
 	if isElement ( veh ) then
 		local x, y, z = getElementPosition ( client )
+		-- first create him some meters away from the player --
+		-- dont create him at the player, else the ped will be visible for some ms --
 		playerpeds[client] = createPed ( 0, x+100, y, z )
 		setElementAlpha ( playerpeds[client], 0 )
 		setElementCollisionsEnabled ( playerpeds[client], false )
 		setElementDimension ( playerpeds[client], getElementDimension ( client ) )
 		setElementInterior ( playerpeds[client], getElementInterior( client ) )
 		if getPedOccupiedVehicleSeat ( client ) == 0 then
+			-- dont attach right next to the player, else the ped will be visible for some ms --
 			attachElements ( playerpeds[client], veh, 100, 0.05, 0.5 )
 			setTimer ( attachElements, 100, 1, playerpeds[client], veh, 0, 0.05, 0.5 )
 		else
+			-- dont attach right next to the player, else the ped will be visible for some ms --
 			attachElements ( playerpeds[client], veh, 100, -0.8, 0.5 )
 			setTimer ( attachElements, 100, 1, playerpeds[client], veh, 0, -0.8, 0.5 )
 		end
+		-- sync with all clients for the damagesystem --
 		triggerClientEvent ( "savePedForDrivebyFix", client, playerpeds[client], veh )
 	end
 end )
