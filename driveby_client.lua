@@ -15,7 +15,6 @@ local functions = {}  -- using this table to easily localize functions
 local limiterTimer
 local peds = {}
 local pedowner = {}
-local isingw = false
 
 
 -- Use this to detect damage on the player using driveby on a bike --
