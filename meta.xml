@@ -30,7 +30,9 @@
 		
 		<!--Whether a weapon should be equiped as soon as you enter a vehicle. -->
 		<setting name="driveby_auto_equip" value="[false]"/>
-
+	
+		<!-- Fixes the hitbox when someone is using driveby on a bike.
+		Only use this if you have your own clientsided damage system, where the attacker triggers the damage -->
 		<setting name="bike_hitbox_fix" value="[true]"/>
 	</settings>
 	<export function="setDriverDrivebyAbility" type="client" />
